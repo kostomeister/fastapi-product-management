@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from sqlalchemy import select
 
 from src.db.db import SessionLocal
+from src.utils.validators import no_result_found_handler
 
 
 class AbstractRepository(ABC):
@@ -31,6 +32,7 @@ class AbstractRepository(ABC):
 class SQLAlchemyRepository(AbstractRepository):
     model = None
 
+    @no_result_found_handler()
     async def get_one(self, id: int):
         async with SessionLocal() as db:
             query = select(self.model).where(self.model.id == id)
@@ -44,35 +46,29 @@ class SQLAlchemyRepository(AbstractRepository):
             return result.scalars().all()
 
     async def create_one(self, data: dict):
-        print(data)
         async with SessionLocal() as db:
             new_object = self.model(**data)
             db.add(new_object)
             await db.commit()
             return new_object
 
+    @no_result_found_handler()
     async def update_one(self, id: int, data: dict):
         async with SessionLocal() as db:
             query = select(self.model).where(self.model.id == id)
             result = await db.execute(query)
-            obj = await result.fetchone()
 
-            if obj:
-                for key, value in data.items():
-                    setattr(obj, key, value)
-                await db.commit()
-                return obj
-            else:
-                return None
+            obj = result.scalar_one()
+            for key, value in data.items():
+                setattr(obj, key, value)
+            await db.commit()
+            return obj
 
+    @no_result_found_handler()
     async def delete_one(self, id: int):
         async with SessionLocal() as db:
             query = select(self.model).where(self.model.id == id)
             result = await db.execute(query)
-            obj = await result.fetchone()
-
-            if obj:
-                db.delete(obj)
-                await db.commit()
-            else:
-                return None
+            obj = result.scalar_one()
+            await db.delete(obj)
+            await db.commit()
