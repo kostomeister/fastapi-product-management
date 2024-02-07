@@ -1,4 +1,10 @@
-from sqlalchemy import Column, Integer, String, DateTime, DECIMAL, func
+from datetime import datetime
+from decimal import Decimal
+
+from sqlalchemy import DateTime, func, String
+from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import mapped_column
+from sqlalchemy.orm import relationship
 
 from src.db.db import Base
 
@@ -6,8 +12,10 @@ from src.db.db import Base
 class Product(Base):
     __tablename__ = "products"
 
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(255), nullable=False)
-    description = Column(String(255), nullable=False)
-    price = Column(DECIMAL)
-    created_at = Column(DateTime, default=func.now())
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[str]
+    price: Mapped[Decimal]
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now())
+
+    inventory = relationship("Inventory", back_populates="product")
