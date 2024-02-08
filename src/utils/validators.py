@@ -11,6 +11,6 @@ def no_result_found_handler():
             try:
                 return await func(*args)
             except exc.NoResultFound:
-                raise HTTPException(status_code=404, detail="No such product")
+                raise HTTPException(status_code=404, detail="No such element!")
         return wrapped
     return wrapper
