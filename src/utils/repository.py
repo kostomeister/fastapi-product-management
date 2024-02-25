@@ -60,7 +60,8 @@ class SQLAlchemyRepository(AbstractRepository):
 
             obj = result.scalar_one()
             for key, value in data.items():
-                setattr(obj, key, value)
+                if value is not None:
+                    setattr(obj, key, value)
             await db.commit()
             return obj
 
