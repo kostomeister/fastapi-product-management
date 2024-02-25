@@ -7,6 +7,7 @@ from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
 
 from src.db.db import Base
+from src.models.inventory import Inventory
 
 
 class Product(Base):
@@ -18,4 +19,4 @@ class Product(Base):
     price: Mapped[Decimal]
     created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now())
 
-    inventory = relationship("Inventory", back_populates="product")
+    inventory = relationship(Inventory, back_populates="product", cascade="all, delete")
